@@ -6,7 +6,7 @@
  
 int main()
 {
-  for (int i = 0 ; i < 5 ; i++)
+  for (int i = 0 ; ; i++)
   {
     std::cout << "Hello World!! " << i << "\n";
     std::cout.flush();
@@ -14,3 +14,4 @@ int main()
   }
   return 0;
 }
+
