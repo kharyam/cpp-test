@@ -4,6 +4,8 @@
 // Header file for input output functions
 #include <iostream>
 
+/* @secret
+ */
 int main() {
   for (int i = 0 ; ; i++)  {
     std::cout << "Hello World " << i << "\n";
