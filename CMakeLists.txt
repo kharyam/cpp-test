@@ -25,6 +25,7 @@ set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package(Threads)
 
 # Enable code coverage
+# TODO - need to make these flags applicable only to unit test executable, not the main executable
 set(CMAKE_CXX_FLAGS "-fprofile-arcs -ftest-coverage -lpthread -O0 ${CMAKE_CXX_FLAGS}")
 
 include_directories(${ProtonCpp_INCLUDE_DIRS} /usr/local/include/gtest/)
