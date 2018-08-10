@@ -24,8 +24,12 @@ find_package(ProtonCpp REQUIRED)
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package(Threads)
 
-include_directories(${ProtonCpp_INCLUDE_DIRS})
-link_libraries(${ProtonCpp_LIBRARIES})
+# Enable code coverage
+set(CMAKE_CXX_FLAGS "-fprofile-arcs -ftest-coverage -lpthread -O0 ${CMAKE_CXX_FLAGS}")
+
+include_directories(${ProtonCpp_INCLUDE_DIRS} /usr/local/include/gtest/)
+link_libraries(${ProtonCpp_LIBRARIES} /usr/local/lib64/libgtest.a /usr/local/lib64/libgtest_main.a
+)
 add_definitions(${ProtonCpp_DEFINITIONS})
 
 
@@ -60,26 +64,8 @@ endif()
 # Single-threaded examples that work on C++03
 foreach(example
     test
+    amq_send
+    unit_test
 )
   add_executable(${example} ${example}.cpp)
 endforeach()
-
-
-#endif()
-
-# Add a test with the correct environment to find test executables and valgrind.
-macro(add_cpp_test name)
-  if(WIN32)
-    set(test_path "$<TARGET_FILE_DIR:broker>;$<TARGET_FILE_DIR:qpid-proton>;$<TARGET_FILE_DIR:qpid-proton-cpp>")
-  else(WIN32)
-    set(test_path "$<TARGET_FILE_DIR:broker>:$ENV{PATH}")
-  endif(WIN32)
-  set(run_env ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/proton-c/env.py ${EXAMPLE_ENV})
-  add_test(NAME ${name} COMMAND ${run_env} "PATH=${test_path}" ${VALGRIND_ENV} "HAS_CPP11=$<$<BOOL:${HAS_ENOUGH_CPP11}>:1>" -- ${ARGN})
-endmacro()
-
-add_cpp_test(cpp-example-container ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example_test.py -v ContainerExampleTest)
-
-if (NOT SSL_IMPL STREQUAL none)
-add_cpp_test(cpp-example-container-ssl ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/example_test.py -v ContainerExampleSSLTest)
-endif()
