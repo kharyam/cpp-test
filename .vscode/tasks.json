@@ -1,0 +1,16 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "oc project local-dev && POD=$(oc get pod | cut -f 1 -d ' ' | grep slave) && oc rsync . $POD:/tmp/cpp-test && oc exec ${POD} -it -- bash -c 'cd /tmp/cpp-test && cpp-build test && cpp-build unit_test && ./unit_test && ./test'",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
