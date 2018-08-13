@@ -24,65 +24,59 @@
 #include <proton/connection.hpp>
 #include <proton/connection_options.hpp>
 #include <proton/container.hpp>
+#include <proton/delivery.hpp>
+#include <proton/link.hpp>
 #include <proton/message.hpp>
 #include <proton/message_id.hpp>
 #include <proton/messaging_handler.hpp>
-#include <proton/tracker.hpp>
-#include <proton/types.hpp>
+#include <proton/value.hpp>
 
 #include <iostream>
 #include <map>
 
 #include "fake_cpp11.hpp"
 
-class simple_send : public proton::messaging_handler {
+class simple_recv : public proton::messaging_handler {
   private:
     std::string url;
     std::string user;
     std::string password;
-    proton::sender sender;
-    int sent;
-    int confirmed;
-    int total;
+    proton::receiver receiver;
+    int expected;
+    int received;
 
   public:
-    simple_send(const std::string &s, const std::string &u, const std::string &p, int c) :
-        url(s), user(u), password(p), sent(0), confirmed(0), total(c) {}
+    simple_recv(const std::string &s, const std::string &u, const std::string &p, int c) :
+        url(s), user(u), password(p), expected(c), received(0) {}
 
     void on_container_start(proton::container &c) OVERRIDE {
         proton::connection_options co;
         if (!user.empty()) co.user(user);
         if (!password.empty()) co.password(password);
-        sender = c.open_sender(url, co);
+        receiver = c.open_receiver(url, co);
+
+        // km - second receiver
+        //c.open_receiver("127.0.0.1:5672/examples", co);
+        std::cout << "Receiver initialized.\n";
     }
 
-    void on_sendable(proton::sender &s) OVERRIDE {
-        while (s.credit() && (total == -1 || sent < total )  {
-            proton::message msg;
-            std::map<std::string, int> m;
-            m["sequence"] = sent + 1;
-
-            msg.id(sent + 1);
-            msg.body(m);
-
-            s.send(msg);
-            sent++;
-            std::cout << "Sent message " << sent << "\n";
-            std::cout.flush();
+    void on_message(proton::delivery &d, proton::message &msg) OVERRIDE {
+        if (proton::coerce<int>(msg.id()) < received) {
+            return; // Ignore duplicate
         }
-    }
 
-    void on_tracker_accept(proton::tracker &t) OVERRIDE {
-        confirmed++;
+        if (expected == 0 || received < expected) {
 
-        if (confirmed == total) {
-            std::cout << "all messages confirmed" << std::endl;
-            t.connection().close();
+            std::cout << msg.body() << "from: " << msg.to() << received << expected << std::endl;
+            received++;
+
+            if (received == expected) {
+                std::cout << "Closing" << std::endl;
+                d.receiver().close();
+                d.connection().close();
+            }
         }
-    }
 
-    void on_transport_close(proton::transport &) OVERRIDE {
-        sent = confirmed;
     }
 };
 
@@ -93,16 +87,17 @@ int main(int argc, char **argv) {
     int message_count = 100;
     example::options opts(argc, argv);
 
-    opts.add_value(address, 'a', "address", "connect and send to URL", "URL");
-    opts.add_value(message_count, 'm', "messages", "send COUNT messages. -1 for continuous send.", "COUNT");
+    opts.add_value(address, 'a', "address", "connect to and receive from URL", "URL");
+    opts.add_value(message_count, 'm', "messages", "receive COUNT messages, -1 to continuously receive", "COUNT");
     opts.add_value(user, 'u', "user", "authenticate as USER", "USER");
     opts.add_value(password, 'p', "password", "authenticate with PASSWORD", "PASSWORD");
 
+
     try {
         opts.parse();
-        std::cout "Preparing to send...";
-        simple_send send(address, user, password, message_count);
-        proton::container(send).run();
+
+        simple_recv recv(address, user, password, message_count);
+        proton::container(recv).run();
 
         return 0;
     } catch (const example::bad_option& e) {
@@ -113,4 +108,3 @@ int main(int argc, char **argv) {
 
     return 1;
 }
-
