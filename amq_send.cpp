@@ -73,7 +73,7 @@ class simple_send : public proton::messaging_handler {
             // TODO Sending in 250 message block chunks for now until we figure out how to
             // adjust the maxprefetch size of the receiver (boo)
             if (sent % 251 == 0) {
-             std::cout << "Sent message block" << "\n";
+             std::cout << "Sent message block " << sent << "\n";
              std::cout.flush();
              usleep(1000000); // Sleep so as not to fill up logs
             }
