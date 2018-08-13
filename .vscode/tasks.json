@@ -6,7 +6,7 @@
         {
             "label": "Build",
             "type": "shell",
-            "command": "oc project local-dev && POD=$(oc get pod | cut -f 1 -d ' ' | grep slave) && oc rsync . $POD:/tmp/cpp-test && oc exec ${POD} -it -- bash -c 'cd /tmp/cpp-test && cpp-build test && cpp-build unit_test && ./unit_test && ./test'",
+            "command": "oc project local-dev && POD=$(oc get pod | cut -f 1 -d ' ' | grep slave) && oc rsync . $POD:/tmp/cpp-test && oc exec ${POD} -it -- bash -c 'cd /tmp/cpp-test && cpp-build amq_send && cpp-build unit_test && ./unit_test && ./amq_send -a 192.168.124.203:5672/examples -m -1'",
             "group": {
                 "kind": "build",
                 "isDefault": true

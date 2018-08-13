@@ -69,9 +69,16 @@ class simple_send : public proton::messaging_handler {
 
             s.send(msg);
             sent++;
-            usleep(1000000); // Sleep for a sec so as not to fill up logs
-            std::cout << "Sent message " << sent << "\n";
-            std::cout.flush();
+
+            // TODO Sending in 250 message block chunks for now until we figure out how to
+            // adjust the maxprefetch size of the receiver (boo)
+            if (sent % 251 == 0) {
+             std::cout << "Sent message block" << "\n";
+             std::cout.flush();
+             usleep(1000000); // Sleep so as not to fill up logs
+            }
+
+
         }
     }
 
@@ -103,7 +110,7 @@ int main(int argc, char **argv) {
 
     try {
         opts.parse();
-        std::cout << "Preparing to send...";
+        std::cout << "Preparing to send...\n";
         simple_send send(address, user, password, message_count);
         proton::container(send).run();
 
