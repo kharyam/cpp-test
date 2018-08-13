@@ -30,6 +30,8 @@
 #include <proton/tracker.hpp>
 #include <proton/types.hpp>
 
+#include <unistd.h>
+
 #include <iostream>
 #include <map>
 
@@ -57,7 +59,7 @@ class simple_send : public proton::messaging_handler {
     }
 
     void on_sendable(proton::sender &s) OVERRIDE {
-        while (s.credit() && (total == -1 || sent < total )  {
+        while (s.credit() && (total == -1 || sent < total ) ) {
             proton::message msg;
             std::map<std::string, int> m;
             m["sequence"] = sent + 1;
@@ -67,6 +69,7 @@ class simple_send : public proton::messaging_handler {
 
             s.send(msg);
             sent++;
+            usleep(1000000); // Sleep for a sec so as not to fill up logs
             std::cout << "Sent message " << sent << "\n";
             std::cout.flush();
         }
