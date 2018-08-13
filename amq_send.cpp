@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 
     try {
         opts.parse();
-        std::cout "Preparing to send...";
+        std::cout << "Preparing to send...";
         simple_send send(address, user, password, message_count);
         proton::container(send).run();
 
