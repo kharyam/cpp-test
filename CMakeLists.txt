@@ -29,7 +29,7 @@ find_package(Threads)
 set(CMAKE_CXX_FLAGS "-fprofile-arcs -ftest-coverage -lpthread -O0 ${CMAKE_CXX_FLAGS}")
 
 include_directories(${ProtonCpp_INCLUDE_DIRS} /usr/local/include/gtest/)
-link_libraries(${ProtonCpp_LIBRARIES} /usr/local/lib64/libgtest.a /usr/local/lib64/libgtest_main.a
+link_libraries(${ProtonCpp_LIBRARIES} /usr/lib64/libgtest.so.0 /usr/lib64/libgtest_main.so.0
 )
 add_definitions(${ProtonCpp_DEFINITIONS})
 
