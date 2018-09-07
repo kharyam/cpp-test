@@ -1,0 +1,5 @@
+find_package(GTest REQUIRED)
+set(CMAKE_CXX_FLAGS "-fprofile-arcs -ftest-coverage -lpthread -O0 ${CMAKE_CXX_FLAGS}")
+link_libraries(gtest gtest_main)
+add_executable(unit_test unit_test.cpp)
+#target_link_libraries(unit_test GTest::GTest GTest::Main)
