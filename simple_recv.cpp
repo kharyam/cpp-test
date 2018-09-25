@@ -30,6 +30,7 @@
 #include <proton/message_id.hpp>
 #include <proton/messaging_handler.hpp>
 #include <proton/value.hpp>
+#include "person.pb.h"
 
 #include <iostream>
 #include <map>
@@ -62,8 +63,11 @@ class simple_recv : public proton::messaging_handler {
 
     void on_message(proton::delivery &d, proton::message &msg) OVERRIDE {
         if (expected == 0 || received < expected) {
-
-            std::cout << msg.body() << "from: " << msg.to() << received << expected << std::endl;
+            std::string data = msg.body().get<std::string>();
+            Person person;
+            person.ParseFromString(data);
+ 
+            std::cout << "name: " << person.first_name()  << ' ' << person.last_name() << " age: " << person.age() << " received:" << received << std::endl;
             received++;
 
             if (received == expected) {

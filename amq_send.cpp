@@ -29,6 +29,8 @@
 #include <proton/messaging_handler.hpp>
 #include <proton/tracker.hpp>
 #include <proton/types.hpp>
+#include "person.pb.h"
+
 
 #include <unistd.h>
 
@@ -61,12 +63,19 @@ class simple_send : public proton::messaging_handler {
     void on_sendable(proton::sender &s) OVERRIDE {
         while (s.credit() && (total == -1 || sent < total ) ) {
             proton::message msg;
-            std::map<std::string, int> m;
-            m["sequence"] = sent + 1;
+            // std::map<std::string, int> m;
+            // m["sequence"] = sent + 1;
 
-            msg.id(sent + 1);
-            msg.body(m);
+            // msg.id(sent + 1);
+            // msg.body(m);
+            Person person;
+            person.set_first_name("Pat");
+            person.set_last_name("Smith");
+            person.set_age(18 + (sent % 72));
 
+            std::string data;
+            person.SerializeToString(&data);
+            msg.body(data);
             s.send(msg);
             sent++;
 
@@ -77,8 +86,6 @@ class simple_send : public proton::messaging_handler {
              std::cout.flush();
              usleep(1000000); // Sleep so as not to fill up logs
             }
-
-
         }
     }
 
